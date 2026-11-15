@@ -6,6 +6,8 @@ All notable changes to this integration are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.0.1] - 2026-11-15
+
 ### Added
 
 - TCL Home account connection (e-mail and password of the mobile app), through the TCL Home
@@ -24,4 +26,5 @@ All notable changes to this integration are documented here. The format follows
 - "Test the connection" button in the configuration screen.
 - English, French, German and Spanish texts and documentation.
 
-[Unreleased]: https://github.com/prohand/gladys-tclhome/commits/main
+[Unreleased]: https://github.com/prohand/gladys-tclhome/compare/v0.0.1...HEAD
+[0.0.1]: https://github.com/prohand/gladys-tclhome/releases/tag/v0.0.1
