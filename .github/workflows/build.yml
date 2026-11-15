@@ -37,6 +37,12 @@ on:
         required: true
         type: string
 
+# Two builds of the same version (a re-run, a tag pushed twice) would race to
+# push the same image tags: the second one waits for the first.
+concurrency:
+  group: build-${{ inputs.version || github.ref }}
+  cancel-in-progress: false
+
 jobs:
   build:
     runs-on: ubuntu-latest
