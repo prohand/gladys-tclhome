@@ -1,0 +1,510 @@
+{
+  "manifest_version": 1,
+  "type": "device",
+  "name": "TCL Home",
+  "description": {
+    "en": "Control your TCL air conditioners, dehumidifiers and purifiers through the TCL Home cloud.",
+    "fr": "Pilotez vos climatiseurs, déshumidificateurs et purificateurs TCL via le cloud TCL Home.",
+    "de": "Steuere deine TCL-Klimageräte, Entfeuchter und Luftreiniger über die TCL-Home-Cloud.",
+    "es": "Controle sus aires acondicionados, deshumidificadores y purificadores TCL vía TCL Home."
+  },
+  "version": "0.0.0",
+  "docker_image": "ghcr.io/prohand/gladys-tclhome:0.0.0",
+  "gladys_version": ">=5.3.0",
+  "cover_image": "https://raw.githubusercontent.com/prohand/gladys-tclhome/main/cover.png",
+  "categories": ["climate", "appliances"],
+  "keywords": [
+    "tcl",
+    "tcl home",
+    "cloud",
+    "climatisation",
+    "air conditioner",
+    "split",
+    "clim",
+    "breeva",
+    "dehumidifier",
+    "aws iot"
+  ],
+  "transports": ["cloud"],
+  "config_schema": [
+    {
+      "key": "intro",
+      "type": "section",
+      "label": {
+        "en": "Getting started",
+        "fr": "Pour commencer",
+        "de": "Erste Schritte",
+        "es": "Primeros pasos"
+      },
+      "description": {
+        "en": "This integration goes through the TCL Home cloud, like the mobile app: your devices must first be added in the TCL Home app. Enter the e-mail and password of that account below. Gladys then reads the devices every minute (or at the interval you choose) and sends your orders through the cloud: an Internet connection is required.",
+        "fr": "Cette intégration passe par le cloud TCL Home, comme l'application mobile : vos appareils doivent d'abord être ajoutés dans l'application TCL Home. Saisissez ci-dessous l'e-mail et le mot de passe de ce compte. Gladys lit ensuite les appareils chaque minute (ou à l'intervalle choisi) et envoie vos ordres par le cloud : une connexion Internet est nécessaire.",
+        "de": "Diese Integration nutzt die TCL-Home-Cloud, wie die mobile App: Deine Geräte müssen zuerst in der TCL-Home-App hinzugefügt werden. Gib unten die E-Mail-Adresse und das Passwort dieses Kontos ein. Gladys liest die Geräte dann jede Minute (oder im gewählten Intervall) und sendet deine Befehle über die Cloud: Eine Internetverbindung ist erforderlich.",
+        "es": "Esta integración pasa por la nube TCL Home, como la app móvil: sus dispositivos deben añadirse primero en la app TCL Home. Introduzca abajo el correo y la contraseña de esa cuenta. Gladys lee entonces los dispositivos cada minuto (o al intervalo elegido) y envía sus órdenes por la nube: se necesita conexión a Internet."
+      },
+      "links": [
+        {
+          "url": "https://github.com/prohand/gladys-tclhome/blob/main/docs/en.md",
+          "label": {
+            "en": "Integration documentation",
+            "fr": "Documentation de l'intégration",
+            "de": "Dokumentation der Integration",
+            "es": "Documentación de la integración"
+          }
+        }
+      ]
+    },
+    {
+      "key": "username",
+      "type": "string",
+      "label": {
+        "en": "TCL Home e-mail",
+        "fr": "E-mail TCL Home",
+        "de": "TCL-Home-E-Mail",
+        "es": "Correo de TCL Home"
+      },
+      "description": {
+        "en": "The e-mail you sign in to the TCL Home app with.",
+        "fr": "L'e-mail avec lequel vous vous connectez à l'application TCL Home.",
+        "de": "Die E-Mail-Adresse, mit der du dich in der TCL-Home-App anmeldest.",
+        "es": "El correo con el que inicia sesión en la app TCL Home."
+      },
+      "placeholder": {
+        "en": "name@example.com",
+        "fr": "nom@exemple.fr",
+        "de": "name@beispiel.de",
+        "es": "nombre@ejemplo.es"
+      },
+      "required": true
+    },
+    {
+      "key": "password",
+      "type": "secret",
+      "label": {
+        "en": "TCL Home password",
+        "fr": "Mot de passe TCL Home",
+        "de": "TCL-Home-Passwort",
+        "es": "Contraseña de TCL Home"
+      },
+      "description": {
+        "en": "The password of that account. It is only sent to TCL, never logged.",
+        "fr": "Le mot de passe de ce compte. Il n'est envoyé qu'à TCL et n'est jamais journalisé.",
+        "de": "Das Passwort dieses Kontos. Es wird nur an TCL gesendet und nie protokolliert.",
+        "es": "La contraseña de esa cuenta. Solo se envía a TCL y nunca se registra."
+      },
+      "required": true
+    },
+    {
+      "key": "poll_frequency",
+      "type": "number",
+      "label": {
+        "en": "Refresh interval (s)",
+        "fr": "Intervalle de rafraîchissement (s)",
+        "de": "Aktualisierungsintervall (s)",
+        "es": "Intervalo de actualización (s)"
+      },
+      "description": {
+        "en": "How often each device is read from the cloud, in seconds (60 to 3600).",
+        "fr": "Fréquence de lecture de chaque appareil dans le cloud, en secondes (60 à 3600).",
+        "de": "Wie oft jedes Gerät aus der Cloud gelesen wird, in Sekunden (60 bis 3600).",
+        "es": "Cada cuánto se lee cada dispositivo en la nube, en segundos (60 a 3600)."
+      },
+      "required": false,
+      "default": 60,
+      "min": 60,
+      "max": 3600
+    }
+  ],
+  "actions": [
+    {
+      "key": "test_connection",
+      "label": {
+        "en": "Test the connection",
+        "fr": "Tester la connexion",
+        "de": "Verbindung testen",
+        "es": "Probar la conexión"
+      },
+      "timeout_seconds": 60
+    }
+  ],
+  "scene_triggers": [
+    {
+      "key": "availability_changed",
+      "label": {
+        "en": "TCL device online / offline",
+        "fr": "Appareil TCL en ligne / hors ligne",
+        "de": "TCL-Gerät online / offline",
+        "es": "Dispositivo TCL en línea / sin conexión"
+      },
+      "description": {
+        "en": "A TCL device lost or found its connection to the cloud.",
+        "fr": "Un appareil TCL a perdu ou retrouvé sa connexion au cloud.",
+        "de": "Ein TCL-Gerät hat die Verbindung zur Cloud verloren oder wiedergefunden.",
+        "es": "Un dispositivo TCL perdió o recuperó su conexión con la nube."
+      },
+      "fields": [
+        {
+          "key": "device",
+          "type": "select",
+          "source": "devices",
+          "label": {
+            "en": "Device",
+            "fr": "Appareil",
+            "de": "Gerät",
+            "es": "Dispositivo"
+          }
+        },
+        {
+          "key": "status",
+          "type": "select",
+          "label": {
+            "en": "Becomes",
+            "fr": "Devient",
+            "de": "Wird",
+            "es": "Pasa a"
+          },
+          "options": [
+            {
+              "value": "online",
+              "label": {
+                "en": "Online",
+                "fr": "En ligne",
+                "de": "Online",
+                "es": "En línea"
+              }
+            },
+            {
+              "value": "offline",
+              "label": {
+                "en": "Offline",
+                "fr": "Hors ligne",
+                "de": "Offline",
+                "es": "Sin conexión"
+              }
+            }
+          ]
+        }
+      ],
+      "variables": [
+        {
+          "key": "status",
+          "type": "string",
+          "label": {
+            "en": "New status",
+            "fr": "Nouvel état",
+            "de": "Neuer Status",
+            "es": "Nuevo estado"
+          }
+        }
+      ]
+    },
+    {
+      "key": "error_reported",
+      "label": {
+        "en": "TCL device error",
+        "fr": "Erreur d'un appareil TCL",
+        "de": "Fehler eines TCL-Geräts",
+        "es": "Error de un dispositivo TCL"
+      },
+      "description": {
+        "en": "A TCL device started reporting an error code.",
+        "fr": "Un appareil TCL signale un nouveau code d'erreur.",
+        "de": "Ein TCL-Gerät meldet einen neuen Fehlercode.",
+        "es": "Un dispositivo TCL informa de un nuevo código de error."
+      },
+      "fields": [
+        {
+          "key": "device",
+          "type": "select",
+          "source": "devices",
+          "label": {
+            "en": "Device",
+            "fr": "Appareil",
+            "de": "Gerät",
+            "es": "Dispositivo"
+          }
+        }
+      ],
+      "variables": [
+        {
+          "key": "code",
+          "type": "string",
+          "label": {
+            "en": "Error code(s)",
+            "fr": "Code(s) d'erreur",
+            "de": "Fehlercode(s)",
+            "es": "Código(s) de error"
+          }
+        }
+      ]
+    }
+  ],
+  "scene_actions": [
+    {
+      "key": "set_climate",
+      "label": {
+        "en": "Set a TCL air conditioner",
+        "fr": "Régler un climatiseur TCL",
+        "de": "TCL-Klimagerät einstellen",
+        "es": "Ajustar un aire acondicionado TCL"
+      },
+      "description": {
+        "en": "Turn a unit on with a mode, a temperature and a fan speed.",
+        "fr": "Allume un appareil avec un mode, une température et une ventilation.",
+        "de": "Schaltet ein Gerät mit Modus, Temperatur und Lüfterstufe ein.",
+        "es": "Enciende un equipo con un modo, una temperatura y una velocidad."
+      },
+      "timeout_seconds": 30,
+      "fields": [
+        {
+          "key": "device",
+          "type": "select",
+          "source": "devices",
+          "label": {
+            "en": "Air conditioner",
+            "fr": "Climatiseur",
+            "de": "Klimagerät",
+            "es": "Aire acondicionado"
+          },
+          "required": true
+        },
+        {
+          "key": "mode",
+          "type": "select",
+          "label": {
+            "en": "Mode (empty: unchanged)",
+            "fr": "Mode (vide : inchangé)",
+            "de": "Modus (leer: unverändert)",
+            "es": "Modo (vacío: sin cambios)"
+          },
+          "options": [
+            {
+              "value": "auto",
+              "label": {
+                "en": "Auto",
+                "fr": "Auto",
+                "de": "Automatik",
+                "es": "Automático"
+              }
+            },
+            {
+              "value": "cool",
+              "label": {
+                "en": "Cool",
+                "fr": "Froid",
+                "de": "Kühlen",
+                "es": "Frío"
+              }
+            },
+            {
+              "value": "heat",
+              "label": {
+                "en": "Heat",
+                "fr": "Chaud",
+                "de": "Heizen",
+                "es": "Calor"
+              }
+            },
+            {
+              "value": "dry",
+              "label": {
+                "en": "Dry",
+                "fr": "Déshumidification",
+                "de": "Entfeuchten",
+                "es": "Deshumidificar"
+              }
+            },
+            {
+              "value": "fan",
+              "label": {
+                "en": "Fan",
+                "fr": "Ventilation",
+                "de": "Lüften",
+                "es": "Ventilador"
+              }
+            }
+          ]
+        },
+        {
+          "key": "target_temperature",
+          "type": "number",
+          "label": {
+            "en": "Temperature in °C (empty: unchanged)",
+            "fr": "Température en °C (vide : inchangée)",
+            "de": "Temperatur in °C (leer: unverändert)",
+            "es": "Temperatura en °C (vacío: sin cambios)"
+          },
+          "min": 16,
+          "max": 31
+        },
+        {
+          "key": "fan_speed",
+          "type": "select",
+          "label": {
+            "en": "Fan speed (empty: unchanged)",
+            "fr": "Ventilation (vide : inchangée)",
+            "de": "Lüfterstufe (leer: unverändert)",
+            "es": "Velocidad (vacío: sin cambios)"
+          },
+          "options": [
+            {
+              "value": "auto",
+              "label": {
+                "en": "Auto",
+                "fr": "Auto",
+                "de": "Automatik",
+                "es": "Automático"
+              }
+            },
+            {
+              "value": "quiet",
+              "label": {
+                "en": "Quiet",
+                "fr": "Silencieux",
+                "de": "Leise",
+                "es": "Silencioso"
+              }
+            },
+            {
+              "value": "low",
+              "label": {
+                "en": "Low",
+                "fr": "Faible",
+                "de": "Niedrig",
+                "es": "Baja"
+              }
+            },
+            {
+              "value": "medium",
+              "label": {
+                "en": "Medium",
+                "fr": "Moyen",
+                "de": "Mittel",
+                "es": "Media"
+              }
+            },
+            {
+              "value": "high",
+              "label": {
+                "en": "High",
+                "fr": "Fort",
+                "de": "Hoch",
+                "es": "Alta"
+              }
+            },
+            {
+              "value": "turbo",
+              "label": {
+                "en": "Turbo",
+                "fr": "Turbo",
+                "de": "Turbo",
+                "es": "Turbo"
+              }
+            }
+          ]
+        }
+      ],
+      "outputs": [
+        {
+          "key": "applied",
+          "type": "boolean",
+          "label": {
+            "en": "Order sent",
+            "fr": "Ordre envoyé",
+            "de": "Befehl gesendet",
+            "es": "Orden enviada"
+          }
+        }
+      ]
+    },
+    {
+      "key": "turn_off_all",
+      "label": {
+        "en": "Turn off all TCL devices",
+        "fr": "Éteindre tous les appareils TCL",
+        "de": "Alle TCL-Geräte ausschalten",
+        "es": "Apagar todos los dispositivos TCL"
+      },
+      "description": {
+        "en": "Turn off every TCL device that is on.",
+        "fr": "Éteint tous les appareils TCL allumés.",
+        "de": "Schaltet alle eingeschalteten TCL-Geräte aus.",
+        "es": "Apaga todos los dispositivos TCL encendidos."
+      },
+      "timeout_seconds": 60,
+      "outputs": [
+        {
+          "key": "count",
+          "type": "number",
+          "label": {
+            "en": "Devices turned off",
+            "fr": "Appareils éteints",
+            "de": "Ausgeschaltete Geräte",
+            "es": "Dispositivos apagados"
+          }
+        }
+      ]
+    },
+    {
+      "key": "self_clean",
+      "label": {
+        "en": "Start TCL self-cleaning",
+        "fr": "Lancer l'autonettoyage TCL",
+        "de": "TCL-Selbstreinigung starten",
+        "es": "Iniciar autolimpieza TCL"
+      },
+      "description": {
+        "en": "Start the self-cleaning cycle of a unit (it stops the unit).",
+        "fr": "Lance le cycle d'autonettoyage d'un appareil (il l'arrête).",
+        "de": "Startet den Selbstreinigungszyklus eines Geräts (es schaltet ab).",
+        "es": "Inicia el ciclo de autolimpieza de un equipo (lo detiene)."
+      },
+      "timeout_seconds": 30,
+      "fields": [
+        {
+          "key": "device",
+          "type": "select",
+          "source": "devices",
+          "label": {
+            "en": "Air conditioner",
+            "fr": "Climatiseur",
+            "de": "Klimagerät",
+            "es": "Aire acondicionado"
+          },
+          "required": true
+        }
+      ],
+      "outputs": [
+        {
+          "key": "started",
+          "type": "boolean",
+          "label": {
+            "en": "Cycle started",
+            "fr": "Cycle lancé",
+            "de": "Zyklus gestartet",
+            "es": "Ciclo iniciado"
+          }
+        }
+      ]
+    }
+  ],
+  "widgets": [
+    {
+      "key": "tcl_overview",
+      "label": {
+        "en": "TCL Home",
+        "fr": "TCL Home",
+        "de": "TCL Home",
+        "es": "TCL Home"
+      },
+      "description": {
+        "en": "Your TCL devices, their state and quick controls.",
+        "fr": "Vos appareils TCL, leur état et des commandes rapides.",
+        "de": "Deine TCL-Geräte, ihr Zustand und Schnellbefehle.",
+        "es": "Sus dispositivos TCL, su estado y controles rápidos."
+      },
+      "icon": "wind",
+      "action_timeout_seconds": 60
+    }
+  ]
+}
