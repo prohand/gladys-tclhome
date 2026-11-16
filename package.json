@@ -1,6 +1,6 @@
 {
   "name": "gladys-tclhome",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "private": true,
   "description": "Gladys Assistant external integration for TCL Home air conditioners, dehumidifiers and air purifiers (cloud).",
   "type": "module",
